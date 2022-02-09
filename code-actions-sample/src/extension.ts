@@ -29,16 +29,36 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 }
 
+type EmojizerCodeAction = vscode.CodeAction | ResolvableCodeAction;
+
+class ResolvableCodeAction extends vscode.CodeAction {
+	constructor(
+		title: string,
+		readonly emoji: string,
+		readonly document: vscode.TextDocument,
+		readonly range: vscode.Range,
+		kind?: vscode.CodeActionKind) {
+		super(title, kind);
+	}
+
+	public async resolve(): Promise<void> {
+		console.debug(`Resolving code action ${this.title}`);
+		this.edit = new vscode.WorkspaceEdit();
+		this.edit.replace(this.document.uri, new vscode.Range(this.range.start, this.range.start.translate(0, 2)), this.emoji);
+		return;
+	}
+}
+
 /**
  * Provides code actions for converting :) to a smiley emoji.
  */
-export class Emojizer implements vscode.CodeActionProvider {
+export class Emojizer implements vscode.CodeActionProvider<EmojizerCodeAction> {
 
 	public static readonly providedCodeActionKinds = [
 		vscode.CodeActionKind.QuickFix
 	];
 
-	public provideCodeActions(document: vscode.TextDocument, range: vscode.Range): vscode.CodeAction[] | undefined {
+	public provideCodeActions(document: vscode.TextDocument, range: vscode.Range): EmojizerCodeAction[] | undefined {
 		if (!this.isAtStartOfSmiley(document, range)) {
 			return;
 		}
@@ -62,17 +82,22 @@ export class Emojizer implements vscode.CodeActionProvider {
 		];
 	}
 
+	public async resolveCodeAction(codeAction: EmojizerCodeAction, token: vscode.CancellationToken): Promise<EmojizerCodeAction> {
+		console.debug('Emojizer.resolveCodeAction was called for code action', JSON.stringify(codeAction));
+		if (codeAction instanceof ResolvableCodeAction) {
+			await codeAction.resolve();
+		}
+		return codeAction;
+	}
+
 	private isAtStartOfSmiley(document: vscode.TextDocument, range: vscode.Range) {
 		const start = range.start;
 		const line = document.lineAt(start.line);
 		return line.text[start.character] === ':' && line.text[start.character + 1] === ')';
 	}
 
-	private createFix(document: vscode.TextDocument, range: vscode.Range, emoji: string): vscode.CodeAction {
-		const fix = new vscode.CodeAction(`Convert to ${emoji}`, vscode.CodeActionKind.QuickFix);
-		fix.edit = new vscode.WorkspaceEdit();
-		fix.edit.replace(document.uri, new vscode.Range(range.start, range.start.translate(0, 2)), emoji);
-		return fix;
+	private createFix(document: vscode.TextDocument, range: vscode.Range, emoji: string): ResolvableCodeAction {
+		return new ResolvableCodeAction(`Convert to ${emoji}`, emoji, document, range, vscode.CodeActionKind.QuickFix);
 	}
 
 	private createCommand(): vscode.CodeAction {
