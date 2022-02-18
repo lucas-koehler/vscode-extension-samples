@@ -2,7 +2,7 @@
 	"name": "code-actions-sample",
 	"private": true,
 	"displayName": "Code Actions Provider Sample",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"publisher": "lucas-koehler",
 	"repository": {
 		"type": "git",

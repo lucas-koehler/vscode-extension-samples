@@ -7,10 +7,21 @@ import { subscribeToDocumentChanges, EMOJI_MENTION } from './diagnostics';
 
 const COMMAND = 'code-actions-sample.command';
 
+const DOCUMENTATION_COMMAND = 'code-actions-sample.documentation';
+
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.languages.registerCodeActionsProvider('markdown', new Emojizer(), {
-			providedCodeActionKinds: Emojizer.providedCodeActionKinds
+			providedCodeActionKinds: Emojizer.providedCodeActionKinds,
+			documentation: [
+				{
+					kind: vscode.CodeActionKind.QuickFix,
+					command: {
+						title: 'Learn more about Emojis...',
+						command: DOCUMENTATION_COMMAND,
+						tooltip: 'Opens wikipedia to teach you about Emojis.'
+				}}
+			]
 		}));
 
 	const emojiDiagnostics = vscode.languages.createDiagnosticCollection("emoji");
@@ -25,7 +36,8 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand(COMMAND, () => vscode.env.openExternal(vscode.Uri.parse('https://unicode.org/emoji/charts-12.0/full-emoji-list.html')))
+		vscode.commands.registerCommand(COMMAND, () => vscode.env.openExternal(vscode.Uri.parse('https://unicode.org/emoji/charts-12.0/full-emoji-list.html'))),
+		vscode.commands.registerCommand(DOCUMENTATION_COMMAND, () => vscode.env.openExternal(vscode.Uri.parse('https://en.wikipedia.org/wiki/Emoji')))
 	);
 }
 
@@ -71,6 +83,7 @@ export class Emojizer implements vscode.CodeActionProvider<EmojizerCodeAction> {
 		replaceWithSmileyFix.isPreferred = true;
 
 		const replaceWithSmileyHankyFix = this.createFix(document, range, '💩');
+		replaceWithSmileyHankyFix.disabled = { reason: 'Smells too bad.' };
 
 		const commandAction = this.createCommand();
 
