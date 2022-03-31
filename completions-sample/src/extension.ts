@@ -22,6 +22,15 @@ export function activate(context: vscode.ExtensionContext) {
 			snippetCompletion.documentation = docs;
 			docs.baseUri = vscode.Uri.parse('http://example.com/a/b/c/');
 
+			const builtSnippetCompletion = new vscode.CompletionItem('Excellent part of the day');
+			const builtSnippetString = new vscode.SnippetString('Excellent ')
+				.appendChoice(['morning', 'afternoon', 'evening,night'])
+				.appendText('. It is ')
+				.appendVariable('1', '')
+				.appendText(', right?');
+			builtSnippetCompletion.insertText = builtSnippetString;
+			builtSnippetCompletion.documentation =new vscode.MarkdownString("Inserts a snippet that lets you select the _appropriate_ part of the day for your excellent greeting.");
+
 			// a completion item that can be accepted by a commit character,
 			// the `commitCharacters`-property is set which means that the completion will
 			// be inserted and then the character will be typed.
@@ -42,6 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return [
 				simpleCompletion,
 				snippetCompletion,
+				builtSnippetCompletion,
 				commitCharacterCompletion,
 				commandCompletion
 			];
