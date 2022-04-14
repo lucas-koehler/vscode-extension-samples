@@ -8,18 +8,20 @@ import * as vscode from 'vscode';
 let myStatusBarItem: vscode.StatusBarItem;
 
 export function activate({ subscriptions }: vscode.ExtensionContext) {
-
+	console.log('StatusBarItem test extension was activated');
+	
 	// register a command that is invoked when the status bar
 	// item is selected
 	const myCommandId = 'sample.showSelectionCount';
 	subscriptions.push(vscode.commands.registerCommand(myCommandId, () => {
 		const n = getNumberOfSelectedLines(vscode.window.activeTextEditor);
-		vscode.window.showInformationMessage(`Yeah, ${n} line(s) selected... Keep going!`);
+		vscode.window.showInformationMessage(`${n} line(s) selected! StatusBarItem.name: ${myStatusBarItem.name}. StatusBarItem.id: ${myStatusBarItem.id}`);
 	}));
 
 	// create a new status bar item that we can now manage
 	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 	myStatusBarItem.command = myCommandId;
+	myStatusBarItem.name = 'Selected Lines Count';
 	subscriptions.push(myStatusBarItem);
 
 	// register some listener that make sure the status bar 
@@ -33,11 +35,15 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 
 function updateStatusBarItem(): void {
 	const n = getNumberOfSelectedLines(vscode.window.activeTextEditor);
-	if (n > 0) {
-		myStatusBarItem.text = `$(megaphone) ${n} line(s) selected`;
-		myStatusBarItem.show();
+	myStatusBarItem.show();
+	myStatusBarItem.text = `$(megaphone) ${n} line(s) selected`;
+	myStatusBarItem.color = '#0000FF';
+	if (n === 0) {
+		myStatusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
+	} else if (n < 3) {
+		myStatusBarItem.backgroundColor = undefined;
 	} else {
-		myStatusBarItem.hide();
+		myStatusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
 	}
 }
 
