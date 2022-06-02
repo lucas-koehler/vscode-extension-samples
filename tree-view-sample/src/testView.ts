@@ -77,6 +77,7 @@ function getTreeItem(key: string): vscode.TreeItem {
 	return {
 		label: /**vscode.TreeItemLabel**/<any>{ label: key, highlights: key.length > 1 ? [[key.length - 2, key.length - 1]] : void 0 },
 		tooltip,
+		iconPath: new vscode.ThemeIcon(vscode.ThemeIcon.File.id, new vscode.ThemeColor('editorWarning.foreground')),
 		collapsibleState: treeElement && Object.keys(treeElement).length ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None
 	};
 }
