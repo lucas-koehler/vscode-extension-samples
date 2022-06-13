@@ -4,9 +4,7 @@ import * as vscode from 'vscode';
 
 import { DepNodeProvider, Dependency } from './nodeDependencies';
 import { JsonOutlineProvider } from './jsonOutline';
-import { FtpExplorer } from './ftpExplorer';
 import { FileExplorer } from './fileExplorer';
-import { TestViewDragAndDrop } from './testViewDragAndDrop';
 import { TestView } from './testView';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -30,15 +28,8 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('extension.openJsonSelection', range => jsonOutlineProvider.select(range));
 
 	// Samples of `window.createView`
-	new FtpExplorer(context);
 	new FileExplorer(context);
 
 	// Test View
 	new TestView(context);
-
-	// Drag and Drop proposed API sample
-	// This check is for older versions of VS Code that don't have the most up-to-date tree drag and drop API proposal.
-	if (typeof vscode.DataTransferItem === 'function') {
-		new TestViewDragAndDrop(context);
-	}
 }
