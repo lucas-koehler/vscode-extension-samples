@@ -1,7 +1,7 @@
 {
-	"name": "tree-view-sample-label-highlights",
-	"displayName": "Tree Item Label Highlights Test",
-	"description": "Samples for VSCode's tree view label highlights",
+	"name": "tree-view-sample-resolve-items",
+	"displayName": "Tree Item Resolve Test",
+	"description": "Samples for VSCode's tree item resolving",
 	"version": "0.0.1",
 	"publisher": "lucas-koehler",
 	"private": true,
@@ -133,6 +133,14 @@
 			{
 				"command": "testView.changeTitle",
 				"title": "Test View: Change Title"
+			},
+			{
+				"command": "testView.message.a",
+				"title": "Test View: Message A"
+			},
+			{
+				"command": "testView.message.b",
+				"title": "Test View: Message B"
 			}
 		],
 		"menus": {

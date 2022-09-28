@@ -17,6 +17,12 @@ export class TestView {
 				view.title = title;
 			}
 		});
+		vscode.commands.registerCommand('testView.message.a', async (args: any[]) => {
+			vscode.window.showInformationMessage(`Command A with args: ${args}`);
+		});
+		vscode.commands.registerCommand('testView.message.b', async (args: any[]) => {
+			vscode.window.showInformationMessage(`Command B with args: ${args}`);
+		});
 	}
 }
 
@@ -55,6 +61,24 @@ function aNodeWithIdTreeDataProvider(): vscode.TreeDataProvider<{ key: string }>
 		getParent: ({ key }: { key: string }): { key: string } => {
 			const parentKey = key.substring(0, key.length - 1);
 			return parentKey ? new Key(parentKey) : void 0;
+		},
+		resolveTreeItem: (item: vscode.TreeItem, element: { key: string }, token: vscode.CancellationToken): vscode.ProviderResult<vscode.TreeItem> => {
+			console.log(`[tree-item-resolve] Resolving tree item for element: ${element.key}`);
+			item.command = item.command ?? {
+				command: 'testView.message.a',
+				title: 'Test View: Message A',
+				arguments: [element.key]
+			};
+			item.tooltip = item.tooltip ?? new vscode.MarkdownString(`$(zap) Resolved Tooltip for ${element.key}`, true);
+			// Return delayed for item 'aa'
+			if (element.key === 'aa') {
+				return new Promise(resolve => {
+					setTimeout(() => {
+						resolve(item);
+					}, 50);
+				});
+			}
+			return item;
 		}
 	};
 }
@@ -72,11 +96,25 @@ function getChildren(key: string): string[] {
 
 function getTreeItem(key: string): vscode.TreeItem {
 	const treeElement = getTreeElement(key);
-	// An example of how to use codicons in a MarkdownString in a tree item tooltip.
-	const tooltip = new vscode.MarkdownString(`$(zap) Tooltip for ${key}`, true);
+	// b items are initialized with tooltip and command. Thus, they don't need resolving.
+	if (key.startsWith('b')) {
+		// An example of how to use codicons in a MarkdownString in a tree item tooltip.
+		const tooltip = new vscode.MarkdownString(`$(zap) Tooltip for ${key}`, true);
+		const command: vscode.Command = {
+			command: 'testView.message.b',
+			title: 'Test View: Message B',
+			arguments: [key]
+		};
+		return {
+			label: key,
+			command,
+			tooltip,
+			collapsibleState: treeElement && Object.keys(treeElement).length ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None
+		};
+	}
+
 	return {
-		label: /**vscode.TreeItemLabel**/{ label: key, highlights: key.length > 1 ? [[0, 1], [key.length - 2, key.length - 1]] : undefined },
-		tooltip,
+		label: key,
 		collapsibleState: treeElement && Object.keys(treeElement).length ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None
 	};
 }
